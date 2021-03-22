@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form action="/get_sentiment" method="post">
+        <label for="text">Text to analyze: </label>
+        <textarea name="text" id="text"></textarea>
+        <input type="submit" value="Get Sentiment">
+    </form>
+    <p id="result"></p>
+    <input type="button" id="api_req_button" value="Get Sentiment via api">
+    <script>
+        const res = document.getElementById("result");
+        const api_req_button = document.getElementById("api_req_button");
+
+        function get_sentiment_from_api() {
+            let text = document.getElementById("text").value;
+            console.log(text);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", `/get_sentiment_api?text=${text}`, true);
+
+            //Send the proper header information along with the request
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            xhr.onreadystatechange = function () {
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                    res.innerText = xhr.responseText;
+                }
+            }
+            xhr.send();
+
+        }
+
+        api_req_button.addEventListener("click", get_sentiment_from_api);
+
+    </script>
+</body>
+
+</html>
