@@ -1,10 +1,8 @@
 # import flask
 from flask import Flask, request, jsonify, render_template
 from textblob import TextBlob
-import nltk
-from nltk import word_tokenize, sent_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
+
+from twitter_api_handler import get_tweets_with_sentiment
 
 app = Flask(__name__)
 
@@ -15,15 +13,14 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/get_sentiment", methods=["POST"])
-def get_sentiment():
-    sentiment = None
-    if request.method == "POST":
-        text = request.form["text"]
-        sentiment = TextBlob(text).sentiment
-        return render_template("result.html", sentiment_output=sentiment)
-    else:
-        return render_template("error.html")
+@app.route("/get_sentiments", methods=["POST"])
+def get_sentiments():
+    """"""
+    search_term = request.args["q"]
+    items_count = int(request.args["count"])
+
+    response = get_tweets_with_sentiment(query=search_term, count=items_count)
+    return jsonify(response)
 
 
 @app.route("/get_sentiment_api", methods=["POST"])
