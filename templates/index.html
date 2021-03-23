@@ -14,6 +14,15 @@
         <textarea name="text" id="text"></textarea>
         <input type="submit" value="Get Sentiment">
     </form>
+
+    <form id="sentiments_form" action="#" method="post">
+        <label for="search_query">Search Query: </label>
+        <input type="text" name="search_query" id="search_query">
+        <label for="count">Max Number of Tweets to consider: </label>
+        <input type="number" name="count" id="count" value=20 max="100">
+        <input type="submit" value="Get Sentiments">
+    </form>
+
     <p id="result"></p>
     <input type="button" id="api_req_button" value="Get Sentiment via api">
     <script>
@@ -38,9 +47,60 @@
 
         }
 
+        function get_sentiments(e) {
+            let data = null;
+            e.preventDefault();
+            const query = document.getElementById("search_query").value;
+            const count = document.getElementById("count").value;
+            console.log([query, count]);
+            var xhr = new XMLHttpRequest();
+            // xhr.responseType = 'json';
+            xhr.open("POST", `/get_sentiments?q=${query}&count=${count}`, true);
+
+            //Send the proper header information along with the request
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            xhr.onreadystatechange = function () {
+                console.log(this.statusText);
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+
+                    data = JSON.parse(this.responseText);
+                    console.log(data);
+                    data.forEach((tweet, i) => {
+                        const polarity = tweet["sentiment"][0];
+                        const subjectivity = tweet["sentiment"][1];
+                        let r = g = b = 150;
+                        if (polarity > 0) {
+                            r = 0;
+                            g = Math.abs(255 * Math.floor(polarity * 255));
+                        } else if (polarity < 0) {
+                            r = Math.abs(255 * Math.floor(polarity * 255));
+                            g = 0
+                        } else {
+                            r = 100;
+                            g = 100;
+                            b = 100;
+                        }
+                        console.log(`${polarity},${r},${g},${b}`);
+                        console.log(`%c${i}-${polarity},${subjectivity}`, `color:rgb(${r},${g},${b});font-size:4rem;`)
+                        console.log(tweet["original"], tweet['sentiment'][0], tweet['sentiment'][1]);
+                    });
+                }
+            }
+            xhr.send();
+
+        }
+
+
+        document.getElementById("sentiments_form").addEventListener("submit", get_sentiments);
         api_req_button.addEventListener("click", get_sentiment_from_api);
 
     </script>
+    <style>
+        #sdf {
+            color: rgb(255, 33, 49);
+        }
+    </style>
 </body>
 
 </html>
