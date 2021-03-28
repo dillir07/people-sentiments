@@ -6,6 +6,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: stretch;
+        }
+
+        .item {
+            flex-wrap: wrap;
+            align-items: auto;
+            margin: 5px;
+            border-radius: 5px;
+            padding: 10px;
+        }
+    </style>
 </head>
 
 <body>
@@ -23,11 +38,14 @@
         <input type="submit" value="Get Sentiments">
     </form>
 
+    <div class="container" id="tweets_container"></div>
+
     <p id="result"></p>
     <input type="button" id="api_req_button" value="Get Sentiment via api">
     <script>
         const res = document.getElementById("result");
         const api_req_button = document.getElementById("api_req_button");
+        const tweets_container = document.getElementById("tweets_container");
 
         function get_sentiment_from_api() {
             let text = document.getElementById("text").value;
@@ -52,6 +70,7 @@
             e.preventDefault();
             const query = document.getElementById("search_query").value;
             const count = document.getElementById("count").value;
+            let dataHTML = "";
             console.log([query, count]);
             var xhr = new XMLHttpRequest();
             // xhr.responseType = 'json';
@@ -81,10 +100,14 @@
                             g = 100;
                             b = 100;
                         }
-                        console.log(`${polarity},${r},${g},${b}`);
-                        console.log(`%c${i}-${polarity},${subjectivity}`, `color:rgb(${r},${g},${b});font-size:4rem;`)
-                        console.log(tweet["original"], tweet['sentiment'][0], tweet['sentiment'][1]);
+                        dataHTML += `
+                        <div id="tweet_${i}" class="item" style="background-color: rgb(${r}, ${g}, ${b});">
+                            <p>${tweet["original"]}</p>
+                        </div>
+                        `;
                     });
+                    console.log(dataHTML);
+                    tweets_container.innerHTML = dataHTML;
                 }
             }
             xhr.send();
@@ -96,11 +119,6 @@
         api_req_button.addEventListener("click", get_sentiment_from_api);
 
     </script>
-    <style>
-        #sdf {
-            color: rgb(255, 33, 49);
-        }
-    </style>
 </body>
 
 </html>
