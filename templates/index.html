@@ -6,46 +6,54 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <style>
-        .container {
-            display: flex;
-            justify-content: space-evenly;
-            align-items: stretch;
-        }
-
-        .item {
-            flex-wrap: wrap;
-            align-items: auto;
-            margin: 5px;
-            border-radius: 5px;
-            padding: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 </head>
 
 <body>
-    <form action="/get_sentiment" method="post">
-        <label for="text">Text to analyze: </label>
-        <textarea name="text" id="text"></textarea>
-        <input type="submit" value="Get Sentiment">
-    </form>
+    <div class="w3-container w3-center w3-padding">
+        <form action="/get_sentiment" method="post" class="w3-container">
+            <label for="text">Text to analyze: </label>
+            <textarea name="text" id="text" class="w3-input" placeholder=" type some text here"></textarea>
+            <!-- like to leave a preceeding white space in placeholder text so when in focus, placeholder text is readable -->
+            <input type="hidden" value="Get Sentiment" class="w3-btn w3-blue w3-center">
+            <br>
+            <input type="button" id="api_req_button" value="Get Sentiment via api" class="w3-btn w3-green">
+        </form>
+    </div>
 
-    <form id="sentiments_form" action="#" method="post">
-        <label for="search_query">Search Query: </label>
-        <input type="text" name="search_query" id="search_query">
-        <label for="count">Max Number of Tweets to consider: </label>
-        <input type="number" name="count" id="count" value=20 max="100">
-        <input type="submit" value="Get Sentiments">
-    </form>
+    <div class="w3-container w3-padding">
+        <form id="sentiments_form" action="#" method="post" class="w3-container">
+            <label for="search_query">Search Query: </label>
+            <input type="text" name="search_query" id="search_query" class="w3-input">
+            <br>
+            <label for="count">Max Number of Tweets to consider: </label>
+            <input type="number" name="count" id="count" value=100 max="100" class="w3-input">
+            <br>
+            <input type="submit" value="Get Sentiments" class="w3-btn w3-blue">
+        </form>
+    </div>
+    <br>
+    <div class="w3-container">
+        <div class="w3-container">
+            <div class="w3-light-grey">
+                <div class="w3-green" id="positive_bar" style="height:24px;width:0%;display: inline-block;"></div>
+                <div class="w3-red" id="negative_bar" style="height:24px;width:0%;display: inline-block"></div>
+                <div class="w3-grey" id="neutral_bar" style="height:24px;width:0%;display: inline-block"></div>
+            </div>
+        </div>
+    </div>
 
-    <div class="container" id="tweets_container"></div>
+    <div class="w3-row-padding w3-center w3-container" id="tweets_container" class="w3-container"></div>
 
     <p id="result"></p>
-    <input type="button" id="api_req_button" value="Get Sentiment via api">
+
     <script>
         const res = document.getElementById("result");
         const api_req_button = document.getElementById("api_req_button");
         const tweets_container = document.getElementById("tweets_container");
+        const postive_bar = document.getElementById("positive_bar");
+        const negative_bar = document.getElementById("negative_bar");
+        const neutral_bar = document.getElementById("neutral_bar");
 
         function get_sentiment_from_api() {
             let text = document.getElementById("text").value;
@@ -85,28 +93,44 @@
 
                     data = JSON.parse(this.responseText);
                     console.log(data);
+                    let tweets_count = 0;
+                    let positive_tweets_count = 0;
+                    let negative_tweets_count = 0;
+                    let neutral_tweets_count = 0;
+                    tweets_container.innerHTML =
+                        `<div class="w3-panel w3-blue">
+                            <h3>Information!</h3>
+                            <p>Blue often indicates a neutral informative change or action.</p>
+                        </div>`;
                     data.forEach((tweet, i) => {
+                        tweets_count += 1;
                         const polarity = tweet["sentiment"][0];
                         const subjectivity = tweet["sentiment"][1];
                         let r = g = b = 150;
                         if (polarity > 0) {
+                            positive_tweets_count += 1;
                             r = 0;
                             g = Math.abs(255 * Math.floor(polarity * 255));
                         } else if (polarity < 0) {
+                            negative_tweets_count += 1;
                             r = Math.abs(255 * Math.floor(polarity * 255));
                             g = 0
                         } else {
+                            neutral_tweets_count += 1;
                             r = 100;
                             g = 100;
                             b = 100;
                         }
                         dataHTML += `
-                        <div id="tweet_${i}" class="item" style="background-color: rgb(${r}, ${g}, ${b});">
+                        <div id="tweet_${i}" class="w3-col m4 w3-round w3-margin w3-center w3-padding w3-animate-bottom" style="background-color: rgb(${r}, ${g}, ${b});">
                             <p>${tweet["original"]}</p>
                         </div>
                         `;
                     });
-                    console.log(dataHTML);
+                    console.log(tweets_count, positive_tweets_count, negative_tweets_count, neutral_tweets_count);
+                    postive_bar.style.width = Math.floor((positive_tweets_count / tweets_count) * 100) + "%";
+                    negative_bar.style.width = Math.floor((negative_tweets_count / tweets_count) * 100) + "%";
+                    neutral_bar.style.width = Math.floor((neutral_tweets_count / tweets_count) * 100) + "%";
                     tweets_container.innerHTML = dataHTML;
                 }
             }
